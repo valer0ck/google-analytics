@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+APPS = [
+        "google_analytics.analytics",
+        ]
 
 # Application definition
 
@@ -37,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-]
+] + APPS
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -122,3 +125,16 @@ USE_TZ = True
 STATICFILES_DIRS = ( os.path.join (BASE_DIR,'public/static'), )
 STATIC_URL = '/static/'
 
+# Google analitycs
+
+# Google APIs
+SCOPE = ['https://www.googleapis.com/auth/analytics.readonly']
+# Service Account.
+SERVICE_ACCOUNT_EMAIL = ''
+# Path to the Service Account's Private Key file.
+SERVICE_ACCOUNT_PKCS12_FILE_PATH = os.path.join(
+    BASE_DIR,
+    '',
+)
+
+VIEW_ID = ''

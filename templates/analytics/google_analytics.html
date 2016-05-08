@@ -1,0 +1,358 @@
+{% load static from staticfiles %}
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Google analytics</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+{% if token and view_id %}
+  <h1> Statistics </h1>
+
+  <script>
+  (function(w,d,s,g,js,fs){
+    g=w.gapi||(w.gapi={});g.analytics={q:[],ready:function(f){this.q.push(f);}};
+    js=d.createElement(s);fs=d.getElementsByTagName(s)[0];
+    js.src='https://apis.google.com/js/platform.js';
+    fs.parentNode.insertBefore(js,fs);js.onload=function(){g.load('analytics');};
+  }(window,document,'script'));
+  </script>
+
+
+<div class="panel analitycs">
+  <h2>Visits: <span id="usuarios"></span></h2>
+  <div id="selector-fecha-usuarios"></div>
+  <div id="chart-usuarios"></div>
+  <div class="line">
+    <div class="line-chart">
+      <h3>Pages viewed per session: <span id="paginas-sesion"></span></h3>
+      <div id="chart-paginas-sesion"></div>
+    </div>
+    <div class="line-chart">
+      <h3>New users: <span id="usuarios-nuevos"></span></h3>
+      <div id="chart-usuarios-nuevos"></div>
+    </div>
+    <div class="line-chart">
+      <h3>Pages viewed: <span id="paginas-vistas"></span></h3>
+      <div id="chart-paginas-vistas"></div>
+    </div>
+  </div>
+  <div class="line">
+    <div class="line-chart">
+      <h3>AVG session duration: <span id="avg-sesion"></span></h3>
+      <div id="chart-avg-sesion"></div>
+    </div>
+    <div class="line-chart">
+      <h3>Bounce rate: <span id="rebote"></span></h3>
+      <div id="chart-rebote"></div>
+    </div>
+    <div class="line-chart">
+      <h3>New session: <span id="sesiones-nuevas"></span></h3>
+      <div id="chart-sesiones-nuevas"></div>
+    </div>
+  </div>
+  <div>
+    <div class="pie-chart">
+      <h3>Pages viewed</h3>
+      <div id="chart-paginas"></div>
+    </div>
+    <div class="pie-chart">
+      <h3>Countries</h3>
+      <div id="chart-paises"></div>
+    </div>
+  </div>
+
+  </div>
+  <script type="text/javascript" src="{% static "date-range-selector.js" %}"></script>
+
+  <script>
+
+  gapi.analytics.ready(function() {
+    /**
+     * Authorize the user with an access token obtained server side.
+     */
+    gapi.analytics.auth.authorize({
+      'serverAuth': {
+        'access_token': '{{token}}'
+      }
+    });
+
+    var fechaUsuarios = {
+      'start-date': '30daysAgo',
+      'end-date': 'today'
+    };
+
+    var selectorUsuarios = new gapi.analytics.ext.DateRangeSelector({
+      container: 'selector-fecha-usuarios'
+    })
+    .set(fechaUsuarios)
+    .execute();
+
+    selectorUsuarios.on('change', function(data) {
+      datosChartUsuarios.set({query: data}).execute();
+      datosChartPaginasSesion.set({query: data}).execute();
+      datosChartUsuariosNuevos.set({query: data}).execute();
+      datosChartPaginasVistas.set({query: data}).execute();
+      datosChartAvgSesion.set({query: data}).execute();
+      datosChartRebote.set({query: data}).execute();
+      datosChartSesionesNuevas.set({query: data}).execute();
+      datosChartPaginas.set({query: data}).execute();
+      datosChartPaises.set({query: data}).execute();
+    });
+
+    // Usuarios y sesiones
+    var datosChartUsuarios = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'metrics': 'ga:sessions,ga:users',
+        'dimensions': 'ga:date',
+        query: 'fechaUsuarios'
+      },
+      chart: {
+        'container': 'chart-usuarios',
+        'type': 'LINE',
+        'options': {
+          'width': '100%'
+        }
+      }
+    });
+
+    datosChartUsuarios.on('success', function(response) {
+      var elemento = document.getElementById("usuarios");
+      var usuarios = parseInt(response.response.totalsForAllResults['ga:users']);
+      elemento.innerHTML = usuarios;
+    });
+
+    datosChartUsuarios.execute();
+
+
+    // Paginas visitadas por cada sesion
+    var datosChartPaginasSesion = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'metrics': 'ga:pageviewsPerSession',
+        'dimensions': 'ga:date',
+      },
+      chart: {
+        'container': 'chart-paginas-sesion',
+        'type': 'LINE',
+        'options': {
+          'width': '100%'
+        }
+      }
+    });
+    datosChartPaginasSesion.on('success', function(response) {
+      var elemento = document.getElementById("paginas-sesion");
+      var paginas = parseFloat(response.response.totalsForAllResults['ga:pageviewsPerSession']).toFixed(2);
+      elemento.innerHTML = paginas;
+    });
+
+    datosChartPaginasSesion.execute();
+
+
+    // Usuarios nuevos
+    var datosChartUsuariosNuevos = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'metrics': 'ga:newUsers',
+        'dimensions': 'ga:date',
+      },
+      chart: {
+        'container': 'chart-usuarios-nuevos',
+        'type': 'LINE',
+        'options': {
+          'width': '100%'
+        }
+      }
+    });
+
+    datosChartUsuariosNuevos.on('success', function(response) {
+      var elemento = document.getElementById("usuarios-nuevos");
+      elemento.innerHTML = parseInt(response.response.totalsForAllResults['ga:newUsers']);
+    });
+
+    datosChartUsuariosNuevos.execute();
+
+
+    // Paginas vistas
+    var datosChartPaginasVistas = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'metrics': 'ga:pageviews',
+        'dimensions': 'ga:date',
+      },
+      chart: {
+        'container': 'chart-paginas-vistas',
+        'type': 'LINE',
+        'options': {
+          'width': '100%'
+        }
+      }
+    });
+
+    datosChartPaginasVistas.on('success', function(response) {
+      var elemento = document.getElementById("paginas-vistas");
+      elemento.innerHTML = parseInt(response.response.totalsForAllResults['ga:pageviews']);
+    });
+
+    datosChartPaginasVistas.execute();
+
+
+    // Duración media de cada sesión
+    var datosChartAvgSesion = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'metrics': 'ga:avgSessionDuration',
+        'dimensions': 'ga:date',
+      },
+      chart: {
+        'container': 'chart-avg-sesion',
+        'type': 'LINE',
+        'options': {
+          'width': '100%'
+        }
+      }
+    });
+
+    datosChartAvgSesion.on('success', function(response) {
+      var elemento = document.getElementById("avg-sesion");
+      var sesion = parseFloat(response.response.totalsForAllResults['ga:avgSessionDuration']);
+      elemento.innerHTML = formato_hora(sesion);
+    });
+
+    datosChartAvgSesion.execute();
+
+
+    // Porcentaje de rebote
+    var datosChartRebote = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'metrics': 'ga:bounceRate',
+        'dimensions': 'ga:date',
+      },
+      chart: {
+        'container': 'chart-rebote',
+        'type': 'LINE',
+        'options': {
+          'width': '100%'
+        }
+      }
+    });
+
+    datosChartRebote.on('success', function(response) {
+      var elemento = document.getElementById("rebote");
+      elemento.innerHTML = parseFloat(response.response.totalsForAllResults['ga:bounceRate']).toFixed(2) + "%";
+    });
+
+    datosChartRebote.execute();
+
+
+    // Porcentaje de sesiones nuevas
+    var datosChartSesionesNuevas = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'metrics': 'ga:percentNewSessions',
+        'dimensions': 'ga:date',
+      },
+      chart: {
+        'container': 'chart-sesiones-nuevas',
+        'type': 'LINE',
+        'options': {
+          'width': '100%'
+        }
+      }
+    });
+
+    datosChartSesionesNuevas.on('success', function(response) {
+      var elemento = document.getElementById("sesiones-nuevas");
+      elemento.innerHTML = parseFloat(response.response.totalsForAllResults['ga:percentNewSessions']).toFixed(2) + "%";
+    });
+
+    datosChartSesionesNuevas.execute();
+
+    // Paginas mas visitadas
+    var datosChartPaginas = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'metrics': 'ga:pageviews',
+        'dimensions': 'ga:pagePathLevel1',
+        'sort': '-ga:pageviews',
+        'filters': 'ga:pagePathLevel1!=/',
+        'max-results': 7
+      },
+      chart: {
+        'container': 'chart-paginas',
+        'type': 'PIE',
+        'options': {
+          'width': '100%',
+          'pieHole': 4/9,
+        }
+      }
+    });
+    datosChartPaginas.execute();
+
+    // Paises que mas visitan
+    var datosChartPaises = new gapi.analytics.googleCharts.DataChart({
+      query: {
+        'ids': 'ga:{{view_id}}',
+        metrics: 'ga:sessions',
+        dimensions: 'ga:country',
+        'start-date': '30daysAgo',
+        'end-date': 'yesterday',
+        'max-results': 6,
+        sort: '-ga:sessions'
+      },
+      chart: {
+        container: 'chart-paises',
+        type: 'PIE',
+        options: {
+          width: '100%',
+          pieHole: 4/9
+        }
+      }
+    });
+    datosChartPaises.execute();
+
+  });
+
+  function formato_hora(sesion)
+  {
+    var horas = Math.floor((sesion % 86400) / 3600);
+    var minutos = Math.floor(((sesion % 86400) % 3600) / 60);
+    var segundos = (((sesion % 86400) % 3600) % 60).toFixed(0);
+
+    horas = ( horas < 10 ? '0' + horas : horas);
+    minutos = (minutos < 10 ? '0' + minutos : minutos);
+    segundos = (segundos < 10 ? '0' + segundos : segundos);
+
+    return horas + ":" + minutos + ":" + segundos;
+  }
+  </script>
+
+{% else %}
+  <h2>Configuration is not complete yet</h2>
+{% endif %}
+</body>
+</html>
