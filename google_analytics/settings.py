@@ -55,7 +55,9 @@ ROOT_URLCONF = 'google_analytics.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.sep.join([os.path.dirname(os.path.dirname(__file__)), "templates", "analytics"],),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
