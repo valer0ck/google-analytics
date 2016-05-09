@@ -132,7 +132,7 @@ SCOPE = ['https://www.googleapis.com/auth/analytics.readonly']
 # Service Account.
 SERVICE_ACCOUNT_EMAIL = ''
 # Path to the Service Account's Private Key file.
-SERVICE_ACCOUNT_PKCS12_FILE_PATH = os.path.join(
+SERVICE_ACCOUNT_JSON_FILE_PATH = os.path.join(
     BASE_DIR,
     '',
 )
