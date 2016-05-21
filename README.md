@@ -1,6 +1,8 @@
 # Google-analytics
 Show google analytics for your website without google login form. It was developed for Python/Django. I tested it with 1.9 version but lib provided by google is able for lowest versions
 
+![Example](https://raw.githubusercontent.com/valer0ck/google-analytics/master/public/static/images/example.png)
+
 ### Introduction
 Google provide libraries for languages like Python, PHP and others to implementing google analitycs and other google APIs into your website without login form, it uses a token for authorization when accesing a Google API service. For Javascript its also provided a library, but for security reasons you must access trought google login form.
 
